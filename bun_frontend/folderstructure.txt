@@ -1,0 +1,73 @@
+src/
+│
+├── app/
+│   ├── store.ts              # Redux store config
+│   ├── rootReducer.ts        # Combine reducers
+│   └── hooks.ts              # useAppDispatch, useAppSelector
+│
+├── features/
+│   ├── compiler/
+│   │   ├── compilerSlice.ts  # Redux slice
+│   │   ├── compilerAPI.ts    # API calls for compile pipeline
+│   │   ├── types.ts          # AST, Token, IR types
+│   │   ├── selectors.ts      # Memoized selectors
+│   │   └── utils.ts          # Feature-specific helpers
+│   │
+│   ├── editor/
+│   │   ├── editorSlice.ts
+│   │   ├── Editor.tsx
+│   │   └── types.ts
+│   │
+│   ├── visualization/
+│   │   ├── visualizationSlice.ts
+│   │   ├── ASTGraph.tsx
+│   │   ├── IRGraph.tsx
+│   │   └── CFGGraph.tsx
+│   │
+│   ├── auth/                 # if/when needed
+│   │   ├── authSlice.ts
+│   │   └── authAPI.ts
+│   │
+│   └── history/
+│       ├── historySlice.ts
+│       └── HistoryPanel.tsx
+│
+├── components/
+│   ├── ui/                   # dumb, reusable UI
+│   │   ├── Button.tsx
+│   │   ├── Modal.tsx
+│   │   └── Spinner.tsx
+│   │
+│   └── layout/
+│       ├── Navbar.tsx
+│       └── AppLayout.tsx
+│
+├── services/
+│   ├── apiClient.ts          # axios / fetch wrapper
+│   └── socketClient.ts       # if using websockets
+│
+├── pages/
+│   ├── Home.tsx
+│   ├── Playground.tsx
+│   └── Docs.tsx
+│
+├── routes/
+│   └── AppRoutes.tsx
+│
+├── styles/
+│   ├── globals.css
+│   └── theme.css
+│
+├── types/
+│   └── api.ts                
+│
+├── utils/
+│   ├── debounce.ts
+│   └── constants.ts
+│
+├── assets/
+│   └── icons/
+│
+├── App.tsx
+└── main.tsx
+

@@ -1,0 +1,214 @@
+/* AgenticChat.css - Custom styles for AI response markdown rendering */
+
+.agentic-response {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+
+/* Paragraphs */
+.agentic-response p {
+  margin: 0.75rem 0;
+  color: #e2e8f0;
+}
+
+/* Headers - Visual hierarchy with sections */
+.agentic-response h1,
+.agentic-response h2,
+.agentic-response h3,
+.agentic-response h4 {
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #c4b5fd;
+}
+
+.agentic-response h1 {
+  font-size: 1.25rem;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.agentic-response h2 {
+  font-size: 1.1rem;
+  color: #a78bfa;
+  border-left: 3px solid #8b5cf6;
+  padding-left: 0.75rem;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), transparent);
+}
+
+.agentic-response h3 {
+  font-size: 1rem;
+  color: #c4b5fd;
+}
+
+/* Unordered Lists */
+.agentic-response ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.75rem 0;
+}
+
+.agentic-response ul li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.agentic-response ul li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #a78bfa;
+  font-weight: bold;
+}
+
+/* Nested lists */
+.agentic-response ul ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.agentic-response ul ul li::before {
+  content: "•";
+  color: #8b5cf6;
+}
+
+/* Ordered Lists */
+.agentic-response ol {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+  counter-reset: list-counter;
+  list-style: none;
+}
+
+.agentic-response ol li {
+  position: relative;
+  padding-left: 0.5rem;
+  margin-bottom: 0.5rem;
+  counter-increment: list-counter;
+}
+
+.agentic-response ol li::before {
+  content: counter(list-counter) ".";
+  position: absolute;
+  left: -1.5rem;
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+/* Strong/Bold text */
+.agentic-response strong {
+  color: #ddd6fe;
+  font-weight: 600;
+}
+
+/* Emphasis/Italic */
+.agentic-response em {
+  color: #c4b5fd;
+  font-style: italic;
+}
+
+/* Inline code */
+.agentic-response code {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  font-family: "Fira Code", "JetBrains Mono", monospace;
+}
+
+/* Code blocks */
+.agentic-response pre {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+}
+
+.agentic-response pre code {
+  background: transparent;
+  padding: 0;
+  color: #e2e8f0;
+}
+
+/* Blockquotes - styled as callouts */
+.agentic-response blockquote {
+  border-left: 4px solid #8b5cf6;
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1rem;
+  color: #d1d5db;
+  font-style: italic;
+}
+
+/* Links */
+.agentic-response a {
+  color: #a78bfa;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.agentic-response a:hover {
+  color: #c4b5fd;
+}
+
+/* Horizontal rules - section dividers */
+.agentic-response hr {
+  border: none;
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
+  margin: 1rem 0;
+}
+
+/* Tables */
+.agentic-response table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+}
+
+.agentic-response th {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.agentic-response td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.agentic-response tr:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Special styling for first paragraph (summary) */
+.agentic-response > p:first-child {
+  font-size: 0.95rem;
+  color: #f3f4f6;
+}
+
+/* Section separator effect for multiple sections */
+.agentic-response h2 + p,
+.agentic-response h3 + p {
+  margin-top: 0.5rem;
+}
+
+/* Lists after headers get tighter spacing */
+.agentic-response h2 + ul,
+.agentic-response h3 + ul,
+.agentic-response h2 + ol,
+.agentic-response h3 + ol {
+  margin-top: 0.5rem;
+}

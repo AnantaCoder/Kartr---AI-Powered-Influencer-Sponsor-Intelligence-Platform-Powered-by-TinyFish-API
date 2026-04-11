@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./fastapi_backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fastapi_backend:/app
+      # Mount Firebase credentials if they are a file
+      # - ./fastapi_backend/firebase-service-account.json:/app/firebase-service-account.json
+    env_file:
+      - ./fastapi_backend/.env
+    restart: always
+
+  frontend:
+    build:
+      context: ./bun_frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    env_file:
+      - ./bun_frontend/.env
+    depends_on:
+      - backend
+    restart: always
