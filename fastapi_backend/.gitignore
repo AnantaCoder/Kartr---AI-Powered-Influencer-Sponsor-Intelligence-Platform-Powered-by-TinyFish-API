@@ -1,0 +1,155 @@
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =============================================================================
+# Virtual Environment
+# =============================================================================
+venv/
+env/
+ENV/
+.venv/
+
+# =============================================================================
+# Environment Variables & Secrets
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# Firebase credentials - NEVER commit these
+firebase-service-account.json
+serviceAccountKey.json
+firebase-credentials.json
+*-firebase-adminsdk-*.json
+kartr-firebase-adminsdk.json
+
+# =============================================================================
+# IDE & Editor
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# =============================================================================
+# OS Files
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+test_results*.txt
+
+# =============================================================================
+# Logs & Databases
+# =============================================================================
+*.log
+*.sqlite
+*.db
+logs/
+
+# =============================================================================
+# Jupyter Notebooks
+# =============================================================================
+.ipynb_checkpoints/
+
+# =============================================================================
+# mypy / type checking
+# =============================================================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# =============================================================================
+# Build artifacts
+# =============================================================================
+*.manifest
+*.spec
+
+# =============================================================================
+# Project-specific
+# =============================================================================
+# Data files that shouldn't be versioned
+fastapi_backend/data/*.json
+fastapi_backend/data/*.csv
+<<<<<<< HEAD
+fastapi_backend/data/outputs/**
+!fastapi_backend/data/.gitkeep
+
+# Testing / Verification scripts
+fastapi_backend/verify_*.py
+fastapi_backend/scripts/
+
+# Video outputs
+*.mp4
+*.webm
+
+=======
+!fastapi_backend/data/.gitkeep
+
+>>>>>>> upstream/main
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# =============================================================================
+# Media & Uploads
+# =============================================================================
+uploads/
+data/videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.gif
+

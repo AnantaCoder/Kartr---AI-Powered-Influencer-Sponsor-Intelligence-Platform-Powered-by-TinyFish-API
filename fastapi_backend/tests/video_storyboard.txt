@@ -1,0 +1,58 @@
+Here's a cinematic storyboard for a 25-second video, embracing an epic style with shallow depth of field and dramatic lighting.
+
+---
+
+**Video Title:** Solitaire Summit
+**Theme:** A lone chess player playing chess on snowy mountain peaks at sunset.
+**Style:** Epic, cinematic, shallow depth of field, dramatic lighting.
+**Total Duration:** 25 seconds
+
+---
+
+**Scene 1**
+*   **Duration:** 5 seconds
+*   **Shot Description:** **EXT. SNOWY MOUNTAIN RANGE - SUNSET (ESTABLISHING SHOT)**
+    *   A breathtaking, wide shot of jagged, snow-covered mountain peaks bathed in the golden-orange light of a setting sun. Long shadows stretch across pristine snow. The sky is a canvas of deep blues, purples, and fiery oranges.
+*   **Camera Movement:** A slow, majestic **DRONE PUSH-IN** from an extreme wide shot, subtly revealing more of the vast, untouched landscape. The camera slightly pans to the right, following the arc of the setting sun.
+
+---
+
+**Scene 2**
+*   **Duration:** 4 seconds
+*   **Shot Description:** **EXT. MOUNTAIN PEAK - CRANE REVEAL**
+    *   The drone shot continues to descend and push in, now revealing a solitary figure perched on a flat, snow-covered plateau near a cliff edge. A small, portable chess board is set up before them. The figure is still relatively small in the frame, emphasizing their isolation. The background remains a stunning, slightly out-of-focus panorama of the sunset-lit mountains.
+*   **Camera Movement:** A continuous, smooth **DRONE CRANE DOWN AND PUSH-IN**, gradually bringing the player into focus, but still maintaining an epic sense of scale.
+
+---
+
+**Scene 3**
+*   **Duration:** 4 seconds
+*   **Shot Description:** **EXT. CHESS BOARD - TIGHT SHOT**
+    *   A close-up (shallow depth of field) on the intricately carved wooden chess pieces, half-buried in a thin layer of snow on the board. The golden light of the sunset sharply illuminates the white pieces, casting dramatic shadows. A gloved hand (the player's) hovers over a black pawn. The background is an artistic blur of orange and purple sky.
+*   **Camera Movement:** A slow, deliberate **SLIDER PUSH-IN** on the board, ending on the hovering hand. The focus racks slightly from the king to the pawn as the hand appears.
+
+---
+
+**Scene 4**
+*   **Duration:** 5 seconds
+*   **Shot Description:** **EXT. PLAYER'S FACE - MEDIUM CLOSE-UP**
+    *   A medium close-up of the lone player, their face etched with concentration. Their breath is visible in the cold air. The setting sun backlights their head, creating a dramatic rim light around their silhouette, while a soft fill light illuminates their pensive expression. Their eyes are focused intently downwards, presumably at the board, but they blink and slowly look up. Shallow depth of field blurs the background entirely into soft colors.
+*   **Camera Movement:** A subtle **HANDHELD PUSH-IN** that slightly rotates around the player's head, emphasizing their deep focus. When they look up, the camera holds steady, capturing the slight change in their expression.
+
+---
+
+**Scene 5**
+*   **Duration:** 4 seconds
+*   **Shot Description:** **EXT. PLAYER & BOARD - WIDER SHOT**
+    *   The player makes a definitive move with the pawn (from Scene 3). They then slowly lift their gaze, looking out over the vast mountain range as the sun dips further below the horizon. Their silhouette is now more prominent against the fiery sky.
+*   **Camera Movement:** A **TRACKING SHOT** from slightly behind and to the side of the player, revealing the chess board in the foreground (shallow focus) as the player makes their move. Then, a slow, subtle **CRANE UP** as the player lifts their head, revealing more of the grand, darkening vista behind them.
+
+---
+
+**Scene 6**
+*   **Duration:** 3 seconds
+*   **Shot Description:** **EXT. MOUNTAIN RANGE - CLOSING SHOT**
+    *   A final, epic wide shot. The player is a tiny, still figure on the plateau, silhouetted against the last vestiges of sunset light. The mountains now appear even more vast and imposing, fading into deep twilight blues and purples. A single, triumphant (or perhaps resigned) chess piece (like the king) might be subtly highlighted on the board.
+*   **Camera Movement:** A slow, majestic **DRONE PULL-OUT AND ASCEND**, re-establishing the immense scale and the profound solitude. The image holds for a moment before fading to black.
+
+---
