@@ -237,6 +237,72 @@ class CampaignService:
         # Update match count
         CampaignService.update_campaign(campaign_id, sponsor_id, {"matched_influencers_count": len(matched)})
         return matched
+
+    @staticmethod
+    async def process_bluesky_invites(
+        campaign_id: str, 
+        sponsor_id: str, 
+        influencers: List[Dict[str, str]], 
+        message_template: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Process Bluesky invites for a campaign using TinyFish.
+        """
+        campaign = CampaignService.get_campaign(campaign_id, sponsor_id)
+        if not campaign:
+            return {"success": False, "error": "Campaign not found"}
+
+        from services.tinyfish_service import TinyFishService
+        import os
+        
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        
+        results = []
+        for inf in influencers:
+            influencer_id = inf["influencer_id"]
+            bluesky_handle = inf["bluesky_handle"]
+            
+            # Ensure influencer is added to campaign
+            CampaignService.add_influencer_to_campaign(
+                campaign_id, 
+                sponsor_id, 
+                influencer_id, 
+                notes=f"Bluesky DM to {bluesky_handle}"
+            )
+            
+            # Update status to pending_dm
+            if is_firebase_configured():
+                from database import get_campaign_influencers_repository
+                repo = get_campaign_influencers_repository()
+                if repo:
+                    records = repo.find_by_field("campaign_id", campaign_id) or []
+                    for r in records:
+                        if r.get("influencer_id") == influencer_id:
+                            repo.update(r.get("id"), {"status": "pending_dm"})
+            else:
+                record = get_mock_db().get_campaign_influencer_record(campaign_id, influencer_id)
+                if record:
+                    get_mock_db().update_campaign_influencer(record.get("id"), {"status": "pending_dm"})
+            
+            # Send TinyFish request
+            invite_link = f"{frontend_url}/join/{campaign_id}?bsky={bluesky_handle}"
+            
+            success = await TinyFishService.invite_bluesky_influencer(
+                target_handle=bluesky_handle,
+                invite_link=invite_link,
+                custom_message=message_template
+            )
+            
+            results.append({
+                "influencer_id": influencer_id,
+                "bluesky_handle": bluesky_handle,
+                "success": success,
+                "error": None if success else "DM could not be delivered (recipient privacy settings or API error)."
+            })
+            
+        sent_count = sum(1 for r in results if r["success"])
+        return {"success": True, "results": results, "sent_count": sent_count, "total": len(results)}
+
     
     @staticmethod
     def add_influencer_to_campaign(campaign_id: str, sponsor_id: str, influencer_id: str, notes: Optional[str] = None) -> bool:

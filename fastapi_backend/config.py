@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     
     # Grok API (xAI) - Fallback
     GROK_API_KEY: str = ""
-    GROK_MODEL: str = "grok-2-latest"
+    GROK_MODEL: str = "grok-2"
 
     # Groq API (Fallback - Secondary)
     GROQ_API_KEY: str = ""

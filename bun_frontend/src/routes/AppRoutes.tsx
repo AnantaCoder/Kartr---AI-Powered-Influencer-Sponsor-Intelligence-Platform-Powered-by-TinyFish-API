@@ -14,6 +14,7 @@ import MvpShowcase from '../pages/MvpShowcase';
 import AdStudio from '../pages/AdStudio';
 import SponsorCampaign from '../pages/SponsorCampaign';
 import BulkAnalysis from '../pages/BulkAnalysis';
+import JoinInvite from '../pages/JoinInvite';
 
 // Admin pages
 import AdminDashboard from '../pages/admin/AdminDashboard';
@@ -23,6 +24,7 @@ import SponsorDashboard from '../pages/sponsor/SponsorDashboard';
 import SponsorProfile from '../pages/sponsor/SponsorProfile';
 import InfluencerDiscovery from '../pages/sponsor/InfluencerDiscovery';
 import CampaignDetail from '../pages/sponsor/CampaignDetail';
+import TinyFishAutomation from '../pages/sponsor/TinyFishAutomation';
 
 // Influencer pages
 import InfluencerDashboard from '../pages/influencer/InfluencerDashboard';
@@ -42,6 +44,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/auto-posting" element={<AutoPosting />} />
             <Route path="/VirtualAi" element={<VirtualAi />} />
             <Route path="/BulkAnalysis" element={<BulkAnalysis />} />
+            <Route path="/join/:campaignId" element={<JoinInvite />} />
             {/* <Route path="/innovation-lab" element={<MvpShowcase />} /> */}
             <Route path="/ad-studio" element={<AdStudio />} />
             <Route path="/sponsor/campaigns/:campaignId" element={<CampaignDetail />} />
@@ -57,6 +60,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/sponsor/campaigns" element={<SponsorDashboard />} />
             <Route path="/sponsor/manage-campaign/:campaignId" element={<CampaignDetail />} />
             <Route path="/sponsor/discovery" element={<InfluencerDiscovery />} />
+            <Route path="/sponsor/tinyfish-automation" element={<TinyFishAutomation />} />
 
             {/* Influencer Routes (protected by useInfluencerGuard in component) */}
             <Route path="/influencer" element={<InfluencerDashboard />} />

@@ -30,7 +30,16 @@ const Login: React.FC = () => {
     const onSubmit = async (data: LoginFormValues) => {
         dispatch(clearError());
         const result = await dispatch(login(data));
-        if (login.fulfilled.match(result)) navigate('/');
+        if (login.fulfilled.match(result)) {
+            const pendingCampaign = sessionStorage.getItem('pendingCampaignInvite');
+            if (pendingCampaign) {
+                sessionStorage.removeItem('pendingCampaignInvite');
+                sessionStorage.removeItem('pendingBlueskyHandle');
+                navigate('/influencer/invites');
+            } else {
+                navigate('/');
+            }
+        }
     };
 
     return (
@@ -201,7 +210,16 @@ const Login: React.FC = () => {
                                     onClick={async () => {
                                         dispatch(clearError());
                                         const result = await dispatch(loginWithGoogle("influencer"));
-                                        if (loginWithGoogle.fulfilled.match(result)) navigate('/');
+                                        if (loginWithGoogle.fulfilled.match(result)) {
+                                            const pendingCampaign = sessionStorage.getItem('pendingCampaignInvite');
+                                            if (pendingCampaign) {
+                                                sessionStorage.removeItem('pendingCampaignInvite');
+                                                sessionStorage.removeItem('pendingBlueskyHandle');
+                                                navigate('/influencer/invites');
+                                            } else {
+                                                navigate('/');
+                                            }
+                                        }
                                     }}
                                     disabled={isLoading}
                                 >

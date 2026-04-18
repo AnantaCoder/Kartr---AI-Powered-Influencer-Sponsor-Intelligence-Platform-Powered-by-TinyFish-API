@@ -89,6 +89,7 @@ class InfluencerMatch(BaseModel):
     influencer_id: str
     username: str
     full_name: Optional[str] = ""
+    bluesky_handle: Optional[str] = None
     relevance_score: float = Field(default=50.0, ge=0, le=100)
     matching_keywords: List[str] = []
     channel_stats: Optional[ChannelStats] = None
@@ -124,3 +125,12 @@ class CampaignStatusUpdate(BaseModel):
         pattern="^(in_progress|completed|cancelled)$",
         description="New status: in_progress, completed, or cancelled"
     )
+
+class InfluencerInviteInput(BaseModel):
+    influencer_id: str
+    bluesky_handle: str
+
+class BlueskyInviteRequest(BaseModel):
+    influencers: List[InfluencerInviteInput]
+    message_template: Optional[str] = None
+

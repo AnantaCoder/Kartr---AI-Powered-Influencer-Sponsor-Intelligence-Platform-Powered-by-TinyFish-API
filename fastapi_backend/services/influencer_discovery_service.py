@@ -133,6 +133,7 @@ class InfluencerDiscoveryService:
                 "influencer_id": inf.get("id"),
                 "username": inf.get("username"),
                 "full_name": inf.get("full_name", ""),
+                "bluesky_handle": inf.get("bluesky_handle") or f"@{inf.get('username', 'user')}.bsky.social",
                 "relevance_score": round(item.get("final_score", item.get("base_score", 0)), 1),
                 "matching_keywords": item.get("matching_keywords", [])[:5],
                 "channel_stats": channel_stats,

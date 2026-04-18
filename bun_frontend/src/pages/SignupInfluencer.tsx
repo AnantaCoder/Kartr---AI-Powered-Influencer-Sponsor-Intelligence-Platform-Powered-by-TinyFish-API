@@ -30,7 +30,17 @@ const SignupInfluencer: React.FC = () => {
   const onSubmit = async (data: SignupInfluencerFormValues) => {
     dispatch(clearError());
     const result = await dispatch(registerInfluencer(data));
-    if (registerInfluencer.fulfilled.match(result)) navigate('/YoutubeAnalysis');
+    if (registerInfluencer.fulfilled.match(result)) {
+      const pendingCampaign = sessionStorage.getItem('pendingCampaignInvite');
+      if (pendingCampaign) {
+        // Automatically mapped/accepted logic goes here, or just redirect to invites dashboard
+        sessionStorage.removeItem('pendingCampaignInvite');
+        sessionStorage.removeItem('pendingBlueskyHandle');
+        navigate('/influencer/invites');
+      } else {
+        navigate('/YoutubeAnalysis');
+      }
+    }
   };
 
   return (
@@ -238,7 +248,16 @@ const SignupInfluencer: React.FC = () => {
                   onClick={async () => {
                     dispatch(clearError());
                     const result = await dispatch(loginWithGoogle("influencer"));
-                    if (loginWithGoogle.fulfilled.match(result)) navigate('/YoutubeAnalysis');
+                    if (loginWithGoogle.fulfilled.match(result)) {
+                      const pendingCampaign = sessionStorage.getItem('pendingCampaignInvite');
+                      if (pendingCampaign) {
+                        sessionStorage.removeItem('pendingCampaignInvite');
+                        sessionStorage.removeItem('pendingBlueskyHandle');
+                        navigate('/influencer/invites');
+                      } else {
+                        navigate('/YoutubeAnalysis');
+                      }
+                    }
                   }}
                   disabled={isLoading}
                 >

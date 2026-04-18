@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, BarChart2, Users, Briefcase, TrendingUp, Loader2, Sparkles, Send } from 'lucide-react';
+import { Plus, Search, BarChart2, Users, Briefcase, TrendingUp, Loader2, Sparkles, Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSponsorGuard } from '../../hooks/useRoleGuard';
@@ -52,6 +52,11 @@ const SponsorDashboard = () => {
             const latestRes = await apiClient.get('/campaigns/latest');
             setLatestCampaign(latestRes.data);
 
+        } catch (error) {
+            console.error('Failed to fetch dashboard insights:', error);
+            // Ignore 404, it just means no campaigns yet. 
+            // We should still define the recommended creators!
+        } finally {
             // Robust Mock Data for UI Demo (Ensuring no empty dashes)
             setRecommendedCreators([
                 {
@@ -83,9 +88,6 @@ const SponsorDashboard = () => {
                     score: 90
                 }
             ]);
-        } catch (error) {
-            console.error('Failed to fetch dashboard insights:', error);
-        } finally {
             setLoadingInsights(false);
         }
     };
@@ -153,6 +155,13 @@ const SponsorDashboard = () => {
                             >
                                 <Search className="w-4 h-4" />
                                 Discover Influencers
+                            </button>
+                            <button
+                                onClick={() => navigate('/sponsor/tinyfish-automation')}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors font-medium border border-orange-500/30"
+                            >
+                                <Bot className="w-4 h-4" />
+                                TinyFish Automation
                             </button>
                             <button
                                 onClick={() => setShowForm(true)}

@@ -19,7 +19,8 @@ from models.campaign_schemas import (
     InfluencerMatch,
     AddInfluencerRequest,
     InvitationResponse,
-    CampaignStatusUpdate
+    CampaignStatusUpdate,
+    BlueskyInviteRequest
 )
 from models.schemas import MessageResponse
 from services.campaign_service import CampaignService
@@ -439,6 +440,38 @@ async def add_influencer_to_campaign(
         success=True,
         message="Influencer added to campaign successfully"
     )
+
+@router.post("/{campaign_id}/send-bluesky-invites", response_model=Dict[str, Any])
+async def send_bluesky_invites(
+    campaign_id: str,
+    request: BlueskyInviteRequest,
+    current_user: dict = Depends(require_sponsor)
+):
+    """
+    Send automated Bluesky DMs via TinyFish.
+    
+    Sponsor only endpoint.
+    """
+    influencers = [
+        {"influencer_id": inf.influencer_id, "bluesky_handle": inf.bluesky_handle} 
+        for inf in request.influencers
+    ]
+    
+    result = await CampaignService.process_bluesky_invites(
+        campaign_id=campaign_id,
+        sponsor_id=current_user["id"],
+        influencers=influencers,
+        message_template=request.message_template
+    )
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=result.get("error", "Failed to process invites")
+        )
+    
+    return result
+
 
 
 # =============================================================================

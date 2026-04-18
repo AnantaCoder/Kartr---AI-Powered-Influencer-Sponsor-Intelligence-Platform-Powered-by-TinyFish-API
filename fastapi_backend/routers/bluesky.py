@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Query
 from typing import Optional
 import os
 from datetime import datetime
@@ -15,6 +15,224 @@ router = APIRouter(
     prefix="/api/bluesky",
     tags=["Bluesky"]
 )
+
+@router.get("/search-creators", response_model=dict)
+async def search_global_bluesky_creators(
+    q: str = Query(..., description="Search query/niche term"),
+    limit: int = Query(10, ge=1, le=25, description="Number of results"),
+):
+    """
+    Search real Bluesky accounts globally by keyword/niche.
+    Uses TinyFish to do an authenticated Bluesky search, fetching the top
+    matching creators. Falls back to the public AT Protocol search API.
+    """
+    import httpx
+    import os
+
+    # --- Strategy 1: TinyFish-powered authenticated search ---
+    tinyfish_key = os.getenv("TINYFISH_API_KEY", "").strip()
+    bsky_handle = os.getenv("BLUESKY_HANDLE", "")
+    bsky_password = os.getenv("BLUESKY_PASSWORD", "")
+
+    if tinyfish_key and tinyfish_key != "sk-tinyfish-":
+        try:
+            prompt = (
+                f'Go to https://bsky.app and log in with username "{bsky_handle}" and password "{bsky_password}". '
+                f'Use the search bar to search for "{q}". '
+                f'Filter to "People" tab. '
+                f'Return a structured list of the top {limit} matching profiles, each with: '
+                f'handle (the @handle), displayName, followersCount, and description/bio if visible. '
+                f'Return as JSON array with fields: bluesky_handle, display_name, followers_count, description.'
+            )
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(
+                    "https://api.tinyfish.ai/v1/run",
+                    headers={"Authorization": f"Bearer {tinyfish_key}"},
+                    json={"prompt": prompt, "output": "json"},
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    creators = data if isinstance(data, list) else data.get("result", [])
+                    if creators and len(creators) > 0:
+                        return {"creators": creators, "query": q, "count": len(creators), "source": "tinyfish"}
+        except Exception as e:
+            logger.warning(f"TinyFish Bluesky search failed: {e}. Falling back.")
+
+    # --- Strategy 2: Bluesky authenticated search via atproto ---
+    try:
+        from atproto import Client
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+
+        def _clean_search_terms(raw_query: str) -> list[str]:
+            """
+            Extract clean, individual search terms from a potentially
+            comma-separated or multi-word campaign keywords string.
+            Returns a prioritized list of terms to try.
+            """
+            # Skip very short / noise words
+            STOP_WORDS = {"the", "a", "an", "and", "or", "in", "of", "for",
+                          "to", "with", "is", "are", "be", "by", "on", "at",
+                          "csc", "etc", "vs", "via"}
+            # Split by commas and whitespace
+            parts = [p.strip() for p in raw_query.replace(',', ' ').split()]
+            # Filter: keep words longer than 2 chars that aren't stop words
+            meaningful = [p for p in parts if len(p) > 2 and p.lower() not in STOP_WORDS]
+            # Deduplicate while preserving order
+            seen, unique = set(), []
+            for p in meaningful:
+                pl = p.lower()
+                if pl not in seen:
+                    seen.add(pl)
+                    unique.append(p)
+            # If nothing, fall back to first raw part
+            return unique if unique else [raw_query.split(',')[0].strip()]
+
+        def _search_authenticated():
+            client = Client()
+            client.login(bsky_handle, bsky_password)
+
+            search_terms = _clean_search_terms(q)
+            logger.info(f"Bluesky search terms to try: {search_terms}")
+
+            actors = []
+            for term in search_terms:
+                result = client.app.bsky.actor.search_actors(
+                    {"q": term, "limit": limit}
+                )
+                actors = result.actors or []
+                if actors:
+                    logger.info(f"Got {len(actors)} results for term '{term}'")
+                    break
+                logger.debug(f"No results for '{term}', trying next term...")
+
+            if not actors:
+                return []
+            # Batch fetch profiles to get follower counts
+            dids = [a.did for a in actors]
+            profiles_resp = client.app.bsky.actor.get_profiles({"actors": dids})
+            profile_map = {p.did: p for p in (profiles_resp.profiles or [])}
+            return [
+                {
+                    "bluesky_handle": a.handle,
+                    "display_name": a.display_name or a.handle,
+                    "description": (profile_map.get(a.did, a).description or "")[:120],
+                    "followers_count": getattr(profile_map.get(a.did), 'followers_count', 0) or 0,
+                    "avatar": a.avatar or "",
+                    "did": a.did,
+                }
+                for a in actors
+            ]
+
+        creators = await loop.run_in_executor(None, _search_authenticated)
+        if creators:
+            return {"creators": creators, "query": q, "count": len(creators), "source": "bluesky_auth"}
+    except Exception as e:
+        logger.warning(f"Authenticated atproto search failed: {e}. Falling back to public API.")
+
+
+    # --- Strategy 3: Public AT Protocol API (no auth needed) ---
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                "https://public.api.bsky.app/xrpc/app.bsky.actor.searchActors",
+                params={"q": q, "limit": limit}
+            )
+            if resp.status_code == 200:
+                actors = resp.json().get("actors", [])
+                results = [
+                    {
+                        "bluesky_handle": a.get("handle", ""),
+                        "display_name": a.get("displayName") or a.get("handle", ""),
+                        "description": (a.get("description") or "")[:120],
+                        "followers_count": 0,
+                        "avatar": a.get("avatar", ""),
+                        "did": a.get("did", ""),
+                    }
+                    for a in actors
+                ]
+                return {"creators": results, "query": q, "count": len(results), "source": "public_api"}
+    except Exception as e:
+        logger.error(f"All Bluesky search strategies failed: {e}")
+
+    raise HTTPException(status_code=503, detail="Could not fetch Bluesky creators. Please try again later.")
+
+
+@router.get("/lookup-profile", response_model=dict)
+async def lookup_bluesky_profile(
+    handle: str = Query(..., description="Bluesky handle (with or without @)"),
+):
+    """
+    Fetch a single Bluesky profile by handle.
+    Used by the Custom tab to add specific users to the outreach list.
+    """
+    clean_handle = handle.lstrip("@").strip()
+    if not clean_handle:
+        raise HTTPException(status_code=400, detail="Handle cannot be empty")
+    # Add .bsky.social if no domain specified
+    if "." not in clean_handle:
+        clean_handle = f"{clean_handle}.bsky.social"
+
+    bsky_handle = os.getenv("BLUESKY_HANDLE", "")
+    bsky_password = os.getenv("BLUESKY_PASSWORD", "")
+
+    # Strategy 1: authenticated lookup (gets followers count)
+    if bsky_handle and bsky_password:
+        try:
+            from atproto import Client
+            import asyncio
+
+            def _lookup():
+                c = Client()
+                c.login(bsky_handle, bsky_password)
+                p = c.app.bsky.actor.get_profile({"actor": clean_handle})
+                return {
+                    "bluesky_handle": p.handle,
+                    "display_name": p.display_name or p.handle,
+                    "description": (p.description or "")[:160],
+                    "followers_count": getattr(p, "followers_count", 0) or 0,
+                    "avatar": p.avatar or "",
+                    "did": p.did,
+                    "found": True,
+                }
+
+            loop = asyncio.get_running_loop()
+            result = await loop.run_in_executor(None, _lookup)
+            return result
+        except Exception as e:
+            err = str(e)
+            if "Profile not found" in err or "InvalidRequest" in err:
+                raise HTTPException(status_code=404, detail=f"@{clean_handle} not found on Bluesky.")
+            logger.warning(f"Authenticated profile lookup failed: {e}")
+
+    # Strategy 2: public API fallback
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            resp = await client.get(
+                "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile",
+                params={"actor": clean_handle}
+            )
+            if resp.status_code == 404:
+                raise HTTPException(status_code=404, detail=f"@{clean_handle} not found on Bluesky.")
+            if resp.status_code != 200:
+                raise HTTPException(status_code=502, detail="Bluesky lookup failed.")
+            d = resp.json()
+            return {
+                "bluesky_handle": d.get("handle", clean_handle),
+                "display_name": d.get("displayName") or d.get("handle", clean_handle),
+                "description": (d.get("description") or "")[:160],
+                "followers_count": d.get("followersCount", 0) or 0,
+                "avatar": d.get("avatar", ""),
+                "did": d.get("did", ""),
+                "found": True,
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Could not resolve profile: {e}")
+
 
 @router.post("/connect", response_model=dict)
 async def connect_bluesky_account(
