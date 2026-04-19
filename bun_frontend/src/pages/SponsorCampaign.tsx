@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Rocket, Target, BarChart3, Users, ArrowLeft, Share2, Download, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdvancedAnalytics from "../components/youtube/AdvancedAnalytics";
-import TopInfluencers from "../components/youtube/TopInfluencers";
+import TopInfluencers from "@/components/youtube/TopInfluencers";
 
 const SponsorCampaign: React.FC = () => {
     const { id } = useParams<{ id: string }>();

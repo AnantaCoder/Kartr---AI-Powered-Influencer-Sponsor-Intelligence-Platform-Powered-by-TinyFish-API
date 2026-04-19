@@ -1,6 +1,7 @@
 import os
 import logging
 import asyncio
+import json
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class TinyFishService:
     Fallback: TinyFish browser-bot automation (if API key configured).
     """
 
-    BASE_URL = "https://api.tinyfish.ai/v1"
+    BASE_URL = "https://api.agentql.com/v1"
 
     @staticmethod
     def _build_message(custom_message: Optional[str], invite_link: str) -> str:
@@ -115,7 +116,7 @@ class TinyFishService:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{TinyFishService.BASE_URL}/run",
-                    headers={"Authorization": f"Bearer {api_key}"},
+                    headers={"X-API-Key": api_key},
                     json={"prompt": prompt},
                 )
                 if response.status_code == 200:
@@ -126,6 +127,118 @@ class TinyFishService:
         except Exception as e:
             logger.error(f"TinyFish request failed: {e}")
             return False
+
+    @staticmethod
+    async def _run_tinyfish_prompt(prompt: str) -> Optional[str]:
+        """Run a generic prompt via TinyFish and return the text result."""
+        import httpx
+        
+        api_key = TINYFISH_API_KEY.strip()
+        if not api_key or api_key == "sk-tinyfish-":
+            logger.warning("[DEMO MODE] TinyFish key missing. Cannot run prompt.")
+            return None
+
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    f"{TinyFishService.BASE_URL}/run",
+                    headers={"X-API-Key": api_key},
+                    json={"prompt": prompt},
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    # TinyFish response usually contains 'output' or 'result'
+                    return data.get("output") or data.get("result") or str(data)
+                
+                logger.error(f"TinyFish API error {response.status_code}: {response.text}")
+                return None
+        except Exception as e:
+            logger.error(f"TinyFish request failed: {e}")
+            return None
+
+    @staticmethod
+    async def scrape_youtube_comments(video_url: str, max_comments: int = 50) -> list[dict]:
+        """
+        Scrape comments from a YouTube video using the TinyFish Agent API (AgentQL).
+        Returns a list of dictionaries with 'text', 'author', and 'likes'.
+        """
+        import httpx
+
+        api_key = TINYFISH_API_KEY.strip()
+        if not api_key or api_key == "sk-tinyfish-":
+            logger.warning("[DEMO MODE] TinyFish key missing. Cannot scrape comments.")
+            return []
+
+        logger.info(f"Scraping YouTube comments for: {video_url} using Agent API")
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                query = "{ comments[] { username text likes } }"
+                goal = f"Extract the top {max_comments} comments, including the username, comment text, and number of likes, and return them as JSON."
+                
+                # Using /query-data endpoint as per AgentQL docs
+                response = await client.post(
+                    f"{TinyFishService.BASE_URL}/query-data",
+                    headers={
+                        "X-API-Key": api_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "url": video_url,
+                        "query": query,
+                        "params": {
+                            "is_scroll_to_bottom_enabled": True,
+                            "wait_for": 3
+                        }
+                    },
+                    timeout=120.0
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # The structured output can be inside 'data', directly in the object, or inside 'output'
+                    result_data = data.get("data", data)
+                    
+                    if isinstance(result_data, dict) and "comments" in result_data:
+                        raw_comments = result_data["comments"]
+                    elif isinstance(result_data, list):
+                        raw_comments = result_data
+                    else:
+                        output_str = data.get("output", "")
+                        try:
+                            # Try parsing stringified JSON
+                            import json
+                            parsed = json.loads(output_str) if isinstance(output_str, str) else output_str
+                            if isinstance(parsed, dict) and "comments" in parsed:
+                                raw_comments = parsed["comments"]
+                            elif isinstance(parsed, list):
+                                raw_comments = parsed
+                            else:
+                                raw_comments = []
+                        except Exception:
+                            raw_comments = []
+
+                    if not isinstance(raw_comments, list):
+                        logger.error(f"Unexpected response format from TinyFish Agent: {data}")
+                        return []
+
+                    # Map 'username' back to 'author' to maintain compatibility with the rest of the application
+                    mapped_comments = []
+                    for c in raw_comments:
+                        mapped_comments.append({
+                            "author": c.get("username", c.get("author", "Unknown")),
+                            "text": c.get("text", ""),
+                            "likes": c.get("likes", 0)
+                        })
+
+                    logger.info(f"Successfully scraped {len(mapped_comments)} comments via TinyFish Agent")
+                    return mapped_comments
+                
+                logger.error(f"TinyFish API error {response.status_code}: {response.text}")
+                return []
+        except Exception as e:
+            logger.error(f"TinyFish request failed: {e}")
+            return []
 
     @staticmethod
     async def invite_bluesky_influencer(

@@ -28,13 +28,13 @@ try:
 except ImportError:
     logger.warning("google-generativeai not installed.")
 
-# Initialize OpenAI (for Grok)
+# Initialize OpenAI (for Groq)
 OPENAI_AVAILABLE = False
 try:
     from openai import OpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
-    logger.warning("openai library not installed. Grok fallback unavailable.")
+    logger.warning("openai library not installed. Groq fallback unavailable.")
 
 if GEMINI_AVAILABLE and settings.GEMINI_API_KEY:
     try:
@@ -59,23 +59,23 @@ def _generate_with_fallback(prompt: str) -> tuple[Optional[str], str]:
         except Exception as e:
             logger.warning(f"Gemini analysis failed: {e}. Attempting fallback...")
     
-    # 2. Fallback to Grok (xAI)
-    if OPENAI_AVAILABLE and settings.GROK_API_KEY:
+    # 2. Fallback to Groq
+    if OPENAI_AVAILABLE and settings.GROQ_API_KEY:
         try:
             client = OpenAI(
-                api_key=settings.GROK_API_KEY,
-                base_url="https://api.x.ai/v1",
+                api_key=settings.GROQ_API_KEY,
+                base_url="https://api.groq.com/openai/v1",
             )
             response = client.chat.completions.create(
-                model=settings.GROK_MODEL,
+                model=settings.GROQ_MODEL,
                 messages=[
                     {"role": "system", "content": "You are a helpful AI assistant analyzing YouTube videos."},
                     {"role": "user", "content": prompt}
                 ]
             )
-            return response.choices[0].message.content, settings.GROK_MODEL
+            return response.choices[0].message.content, settings.GROQ_MODEL
         except Exception as e:
-            logger.error(f"Grok fallback failed: {e}")
+            logger.error(f"Groq fallback failed: {e}")
     
     return None, "None"
 
@@ -90,10 +90,10 @@ def analyze_influencer_sponsors(video_url: str) -> Dict[str, Any]:
     if not video_data or "error" in video_data:
         return video_data or {"error": "Could not fetch video data"}
         
-    if not GEMINI_AVAILABLE and not (OPENAI_AVAILABLE and settings.GROK_API_KEY):
+    if not GEMINI_AVAILABLE and not (OPENAI_AVAILABLE and settings.GROQ_API_KEY):
         return {
             **video_data,
-            "analysis": {"error": "No AI services avaliable (Gemini or Grok)"}
+            "analysis": {"error": "No AI services avaliable (Gemini or Groq)"}
         }
 
     # Prepare prompt
@@ -751,3 +751,63 @@ def create_analysis_document(analysis_data: Dict[str, Any]) -> BytesIO:
     document.save(file_stream)
     file_stream.seek(0)
     return file_stream
+
+
+def analyze_comments_intelligence(comments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Use Gemini AI to analyze a list of YouTube comments for deeper intelligence.
+    Extracts sentiment, themes, audience questions, and brand mentions.
+    """
+    if not comments:
+        return {
+            "overall_sentiment": "Neutral",
+            "sentiment_distribution": {"positive": 0, "neutral": 100, "negative": 0},
+            "key_themes": [],
+            "audience_questions": [],
+            "brand_mentions": [],
+            "top_comments": []
+        }
+
+    # Prepare comments for AI
+    comments_text = ""
+    for i, c in enumerate(comments[:50]): # Cap at 50 for token efficiency
+        comments_text += f"[{i}] {c.get('author', 'User')}: {c.get('text', '')}\n"
+
+    prompt = f"""
+    Analyze the following YouTube comments to provide strategic intelligence for a brand/creator.
+    
+    COMMENTS:
+    {comments_text}
+    
+    Provide a structured JSON response with these keys:
+    - overall_sentiment (string): "Positive", "Negative", or "Neutral"
+    - sentiment_distribution (object): Percentage of positive, neutral, and negative comments (e.g., {{"positive": 60, "neutral": 30, "negative": 10}})
+    - key_themes (list of strings): Top 5 recurring themes or topics discussed.
+    - audience_questions (list of strings): Top 3-5 actual questions people are asking.
+    - brand_mentions (list of strings): Names of any brands, competitors, or products mentioned in the comments.
+    - top_comments (list of objects): 5 most representative comments, each with:
+        - author: Name of the author
+        - text: The comment text
+        - sentiment: "Positive", "Negative", or "Neutral"
+    
+    Return ONLY the valid JSON object.
+    """
+
+    response_text, model_used = _generate_with_fallback(prompt)
+    
+    if not response_text:
+        return {"error": "AI analysis of comments failed"}
+
+    try:
+        # Simple JSON cleanup
+        text = response_text.strip()
+        if text.startswith("```json"): text = text[7:]
+        elif text.startswith("```"): text = text[3:]
+        if text.endswith("```"): text = text[:-3]
+        
+        analysis = json.loads(text.strip())
+        logger.info(f"Comments intelligence analysis completed using {model_used}")
+        return analysis
+    except Exception as e:
+        logger.error(f"Error parsing comments intelligence JSON: {e}")
+        return {"error": "Failed to parse comments analysis response", "raw": response_text[:200]}

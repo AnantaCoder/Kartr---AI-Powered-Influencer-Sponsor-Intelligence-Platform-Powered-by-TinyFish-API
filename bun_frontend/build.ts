@@ -126,8 +126,9 @@ const result = await Bun.build({
   entrypoints,
   outdir,
   plugins: [plugin],
-  minify: true,
+  minify: false,
   target: "browser",
+  splitting: true,
   sourcemap: "linked",
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),

@@ -120,3 +120,22 @@ class BulkVideoAnalysisResponse(BaseModel):
     total_count: int
     success_count: int
     failed_count: int
+
+
+class YouTubeCommentsAnalysisRequest(BaseModel):
+    """Request to analyze comments for a YouTube video"""
+    youtube_url: str = Field(..., description="YouTube video URL")
+    max_comments: int = Field(50, description="Maximum number of comments to analyze")
+
+
+class YouTubeCommentsAnalysisResponse(BaseModel):
+    """Detailed intelligence response from comments analysis"""
+    video_id: str
+    total_comments_analyzed: int
+    overall_sentiment: str = Field(..., description="Positive, Negative, or Neutral")
+    sentiment_distribution: dict = Field(..., description="Breakdown of sentiments (positive, neutral, negative)")
+    key_themes: List[str] = Field(default=[], description="Main themes found in comments")
+    audience_questions: List[str] = Field(default=[], description="Direct questions found in comments")
+    brand_mentions: List[str] = Field(default=[], description="Brands or products mentioned in comments")
+    top_comments: List[dict] = Field(default=[], description="Representative comments with their individual sentiment")
+    error: Optional[str] = None

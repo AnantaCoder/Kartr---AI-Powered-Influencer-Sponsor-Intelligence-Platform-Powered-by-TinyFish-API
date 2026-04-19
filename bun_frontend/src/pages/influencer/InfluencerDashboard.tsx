@@ -3,15 +3,16 @@
  * Overview for influencers with their stats and invites
  */
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Youtube, Users, Eye, TrendingUp, Briefcase, Send, Plus, Loader2, Check, X, Play, ExternalLink, DollarSign, Trash2, Sparkles, Filter, Mail, MessageSquare, Wand2 } from 'lucide-react';
+import { Youtube, Users, Eye, TrendingUp, Briefcase, Send, Plus, Loader2, Check, X, Play, ExternalLink, DollarSign, Trash2, Sparkles, Filter, Mail, MessageSquare, Wand2, BrainCircuit } from 'lucide-react';
 import { useInfluencerGuard } from '../../hooks/useRoleGuard';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectUser } from '../../store/slices/authSlice';
-import AnalyticsCard from '../../components/admin/AnalyticsCard';
-import apiClient from '../../services/apiClient';
-import Breadcrumbs from '../../components/common/Breadcrumbs';
+import { analyzeYoutubeComments } from '@/store/slices/youtubeSlice';
+import AnalyticsCard from '@/components/admin/AnalyticsCard';
+import apiClient from '@/services/apiClient';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import {
     Dialog,
     DialogContent,
@@ -23,8 +24,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SponsorshipPitchModal from '../../components/influencer/SponsorshipPitchModal';
-import CampaignInvites from '../../components/influencer/CampaignInvites';
+import SponsorshipPitchModal from '@/components/influencer/SponsorshipPitchModal';
+import CampaignInvites from '@/components/influencer/CampaignInvites';
 
 interface ChannelStats {
     totalSubscribers: number;
@@ -78,6 +79,8 @@ interface BrandRecommendation {
 }
 
 const InfluencerDashboard = () => {
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const { isLoading: authLoading, isAuthorized } = useInfluencerGuard();
     const user = useAppSelector(selectUser);
     const [stats, setStats] = useState<ChannelStats>({
@@ -505,6 +508,32 @@ const InfluencerDashboard = () => {
                                     View Invites
                                 </Button>
                             </div>
+
+                            {/* Audience Intelligence */}
+                            <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-600/5 border border-emerald-500/20 p-6 flex flex-col col-span-1 md:col-span-2 lg:col-span-3">
+                                <div className="flex justify-between items-start mb-4">
+                                    <BrainCircuit className="w-10 h-10 text-emerald-500" />
+                                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                                        <Sparkles className="w-3 h-3" />
+                                        Advanced
+                                    </div>
+                                </div>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="flex-1">
+                                        <h3 className="text-xl font-bold text-white mb-2">Audience Intelligence (TinyFish Engine)</h3>
+                                        <p className="text-gray-400 text-sm max-w-2xl">
+                                            Deep-dive into your comment section. Analyze audience sentiment, identify recurring themes, and discover what your viewers truly want.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        onClick={() => navigate('/YoutubeAnalysis')}
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-emerald-500/20"
+                                    >
+                                        <BrainCircuit className="w-4 h-4 mr-2" />
+                                        Start Analysis
+                                    </Button>
+                                </div>
+                            </div>
                         </motion.div>
 
                         {/* Potential Sponsors (New) */}
@@ -681,6 +710,15 @@ const InfluencerDashboard = () => {
                                                             <p className="text-green-400 text-sm font-medium">{video.sponsor_name}</p>
                                                         </div>
                                                     )}
+
+                                                    {/* Quick Insight Button */}
+                                                    <Button
+                                                        onClick={() => handleQuickInsight(video)}
+                                                        className="w-full mt-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 h-9 text-xs font-bold uppercase tracking-wider"
+                                                    >
+                                                        <Sparkles className="w-3 h-3 mr-2" />
+                                                        Quick Insight
+                                                    </Button>
                                                 </div>
                                             </div>
                                         ))}

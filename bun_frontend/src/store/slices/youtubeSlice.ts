@@ -1,16 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import type { YoutubeResult, YoutubeAnalysis } from "../../features/schemas/youtubeSchema"
+import type { YoutubeResult, YoutubeAnalysis, CommentsAnalysisResponse } from "../../features/schemas/youtubeSchema"
 import apiClient from "../../services/apiClient"
 
 type YoutubeState = {
   results: YoutubeResult[]
+  results: YoutubeResult[]
+  commentsAnalysis: Record<string, CommentsAnalysisResponse>
   loading: boolean
+  commentsLoading: Record<string, boolean>
   error: string | null
 }
 
 const initialState: YoutubeState = {
   results: [],
+  commentsAnalysis: {},
   loading: false,
+  commentsLoading: {},
   error: null
 }
 
@@ -160,7 +165,30 @@ export const analyzeVideoFile = createAsyncThunk<
   }
 });
 
+export const analyzeYoutubeComments = createAsyncThunk<
+  CommentsAnalysisResponse,
+  { url: string; videoId: string; maxComments?: number }
+>("youtube/analyzeComments", async ({ url, videoId, maxComments = 50 }, thunkAPI) => {
+  try {
+    const res = await apiClient.post<CommentsAnalysisResponse>(
+      "/youtube/analyze-comments",
+      { youtube_url: url, max_comments: maxComments }
+    );
 
+    if (res.data.error && !res.data.overall_sentiment) {
+      return thunkAPI.rejectWithValue(res.data.error);
+    }
+
+    return res.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.detail ||
+      error.response?.data?.error ||
+      error.message ||
+      "Failed to analyze comments";
+    return thunkAPI.rejectWithValue(errorMessage);
+  }
+});
 
 const youtubeSlice = createSlice({
   name: "youtube",
@@ -196,6 +224,19 @@ const youtubeSlice = createSlice({
       .addCase(analyzeVideoFile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || "Failed to analyze file";
+      })
+      .addCase(analyzeYoutubeComments.pending, (state, action) => {
+        const videoId = action.meta.arg.videoId;
+        state.commentsLoading[videoId] = true;
+      })
+      .addCase(analyzeYoutubeComments.fulfilled, (state, action) => {
+        const videoId = action.meta.arg.videoId;
+        state.commentsLoading[videoId] = false;
+        state.commentsAnalysis[videoId] = action.payload;
+      })
+      .addCase(analyzeYoutubeComments.rejected, (state, action) => {
+        const videoId = action.meta.arg.videoId;
+        state.commentsLoading[videoId] = false;
       })
   }
 })

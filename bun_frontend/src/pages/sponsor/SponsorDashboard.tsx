@@ -5,19 +5,19 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, BarChart2, Users, Briefcase, TrendingUp, Loader2, Sparkles, Send, Bot } from 'lucide-react';
+import { Search, Plus, TrendingUp, Users, MessageSquare, BrainCircuit, BarChart3, Settings, Rocket, Zap, Filter, Download, BarChart2, Briefcase, Loader2, Sparkles, Send, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSponsorGuard } from '../../hooks/useRoleGuard';
 import { useCampaigns } from '../../hooks/useCampaigns';
-import CampaignCard from '../../components/campaign/CampaignCard';
-import CampaignForm from '../../components/campaign/CampaignForm';
-import AnalyticsCard from '../../components/admin/AnalyticsCard';
-import Header from '../../components/layout/Header';
-import TopInfluencers from '../../components/youtube/TopInfluencers';
+import CampaignCard from '@/components/campaign/CampaignCard';
+import CampaignForm from '@/components/campaign/CampaignForm';
+import AnalyticsCard from '@/components/admin/AnalyticsCard';
+import Header from '@/components/layout/Header';
+import TopInfluencers from '@/components/youtube/TopInfluencers';
 import type { Campaign, CampaignCreateRequest, CampaignUpdateRequest } from '../../types/campaign';
-import SponsorOutreachModal from '../../components/sponsor/SponsorOutreachModal';
-import apiClient from '../../services/apiClient';
+import SponsorOutreachModal from '@/components/sponsor/SponsorOutreachModal';
+import apiClient from '@/services/apiClient';
 
 const SponsorDashboard = () => {
     const navigate = useNavigate();

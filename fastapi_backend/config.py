@@ -45,11 +45,11 @@ class Settings(BaseSettings):
     
     # Grok API (xAI) - Fallback
     GROK_API_KEY: str = ""
-    GROK_MODEL: str = "grok-2"
+    GROK_MODEL: str = "grok-beta"
 
     # Groq API (Fallback - Secondary)
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama3-70b-8192"
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
     # Tavily Search API
     TAVILY_API_KEY: str = ""

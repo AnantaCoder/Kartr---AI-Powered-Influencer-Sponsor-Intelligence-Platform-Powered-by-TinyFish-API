@@ -30,16 +30,20 @@ import {
     ShieldCheck,
     Users,
     LineChart,
-    LayoutDashboard
+    LayoutDashboard,
+    Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { YoutubeResult } from "@/features/schemas/youtubeSchema";
-import PotentialSponsors from "./PotentialSponsors";
-import TopInfluencers from "./TopInfluencers";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { analyzeYoutubeComments } from "@/store/slices/youtubeSlice";
+import CommentsAnalysisBoard from "./CommentsAnalysisBoard";
+import type { AppDispatch, RootState } from "@/store/store";
 
 import apiClient from "@/services/apiClient";
+import TopInfluencers from "./TopInfluencers";
 
 interface Props {
     result: YoutubeResult;
@@ -50,6 +54,20 @@ const AnalysisDashboard: React.FC<Props> = ({ result }) => {
     const isCreator = perspective === "creator";
     const [isDownloading, setIsDownloading] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+
+    // Select comments analysis state from Redux
+    const commentsAnalysis = useSelector((state: RootState) => state.youtube.commentsAnalysis[result.video_id]);
+    const isCommentsLoading = useSelector((state: RootState) => state.youtube.commentsLoading[result.video_id]);
+
+    const handleAnalyzeComments = () => {
+        if (!result.video_id) return;
+        // In the project structure, we might need a full URL. 
+        // We'll reconstruct it or use the one from state if available.
+        // For now, let's assume a standard youtube URL.
+        const videoUrl = `https://www.youtube.com/watch?v=${result.video_id}`;
+        dispatch(analyzeYoutubeComments({ url: videoUrl, videoId: result.video_id }));
+    };
 
     const handleApply = (brandName: string) => {
         // Redirect to Influencer Dashboard with brand pre-filled
@@ -178,6 +196,24 @@ const AnalysisDashboard: React.FC<Props> = ({ result }) => {
                             <Download className="w-4 h-4 mr-2" />
                         )}
                         Export {isCreator ? "Analysis Data" : "ROI Report"}
+                    </Button>
+                    <Button
+                        onClick={handleAnalyzeComments}
+                        disabled={isCommentsLoading || !!commentsAnalysis}
+                        className={`rounded-xl h-11 px-6 font-bold text-xs uppercase transition-all shadow-xl ${
+                            commentsAnalysis 
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                            : isCreator 
+                                ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                                : "bg-blue-600 hover:bg-blue-700 text-white"
+                        }`}
+                    >
+                        {isCommentsLoading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                            <BrainCircuit className="w-4 h-4 mr-2" />
+                        )}
+                        {commentsAnalysis ? "Comments Intelligence Ready" : "Comments AI Intelligence"}
                     </Button>
                 </div>
             </div>
@@ -384,7 +420,7 @@ const AnalysisDashboard: React.FC<Props> = ({ result }) => {
                             </div>
 
                             <div className="flex-1 w-full min-h-[220px]">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={220} minWidth={1}>
                                     <BarChart data={engagementData} layout="vertical" margin={{ left: 0, right: 30, bottom: 0, top: 0 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
                                         <XAxis type="number" hide />
@@ -433,7 +469,7 @@ const AnalysisDashboard: React.FC<Props> = ({ result }) => {
                                     <span className="text-4xl font-black text-white drop-shadow-lg">{sentimentData[0]?.value ?? 0}%</span>
                                     <span className="text-[10px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-400/10 px-2 py-0.5 rounded-full mt-1">Positive</span>
                                 </div>
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={220} minWidth={1}>
                                     <PieChart>
                                         <Pie
                                             data={sentimentData}
@@ -532,6 +568,30 @@ const AnalysisDashboard: React.FC<Props> = ({ result }) => {
                 </div>
 
             </div>
+
+            {/* Comments Analysis Section */}
+            {isCommentsLoading && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-12 p-12 bg-card/20 rounded-[32px] border border-dashed border-border flex flex-col items-center justify-center text-center gap-4"
+                >
+                    <div className="relative">
+                        <Loader2 className={`w-12 h-12 animate-spin text-${themeColor}-400`} />
+                        <div className={`absolute inset-0 blur-xl bg-${themeColor}-400/20 animate-pulse`} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-white uppercase tracking-tight">TinyFish Agent is Scraping Comments</h3>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">
+                            Scrolling through feed, extracting sentiment, and identifying trends...
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+
+            {commentsAnalysis && (
+                <CommentsAnalysisBoard analysis={commentsAnalysis} themeColor={themeColor} />
+            )}
         </motion.div>
     );
 };

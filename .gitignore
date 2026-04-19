@@ -63,3 +63,23 @@ next-env.d.ts
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Project Specific & AI Temp Files
+temp_tinyfish/
+implementation_plan.md
+task.md
+walkthrough.md
+tinyfish_test_report.txt
+fastapi_backend/tests/*.txt
+fastapi_backend/tests/*.log
+fastapi_backend/tests/video_storyboard.txt
+fastapi_backend/debug_*.py
+fastapi_backend/check_deps.py
+fastapi_backend/trace_imports.py
+fastapi_backend/test_*.py
+fastapi_backend/verify_*.py
+fastapi_backend/generate_*.py
+fastapi_backend/seed_*.py
+fastapi_backend/seeds/
+fastapi_backend/demo_features.py
+

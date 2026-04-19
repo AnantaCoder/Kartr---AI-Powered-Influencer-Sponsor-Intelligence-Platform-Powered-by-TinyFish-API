@@ -21,6 +21,8 @@ from models.schemas import (
     YouTubeChannelResponse,
     MessageResponse,
     BulkVideoAnalysisResponse,
+    YouTubeCommentsAnalysisRequest,
+    YouTubeCommentsAnalysisResponse,
 )
 from services.youtube_service import youtube_service
 from services.auth_service import AuthService
@@ -472,4 +474,53 @@ async def analyze_uploaded_video(
                 
     except Exception as e:
         logger.error(f"Upload analysis failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@router.post("/analyze-comments", response_model=YouTubeCommentsAnalysisResponse)
+async def analyze_youtube_comments(
+    request: YouTubeCommentsAnalysisRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Analyze YouTube comments for intelligence (sentiment, themes, questions).
+    Uses TinyFish for scraping and Gemini for analysis.
+    """
+    youtube_url = request.youtube_url
+    max_comments = request.max_comments
+
+    video_id = youtube_service.extract_video_id(youtube_url)
+    if not video_id:
+        raise HTTPException(400, "Invalid YouTube URL")
+
+    try:
+        from services.tinyfish_service import TinyFishService
+        from services.analysis_service import analyze_comments_intelligence
+        
+        # 1. Scrape comments via TinyFish
+        comments = await TinyFishService.scrape_youtube_comments(youtube_url, max_comments)
+        
+        if not comments:
+            return YouTubeCommentsAnalysisResponse(
+                video_id=video_id,
+                total_comments_analyzed=0,
+                overall_sentiment="Neutral",
+                sentiment_distribution={"positive": 0, "neutral": 100, "negative": 0},
+                error="Could not scrape comments. The video might have comments disabled or TinyFish failed."
+            )
+
+        # 2. Analyze comments via Gemini
+        analysis = analyze_comments_intelligence(comments)
+        
+        if "error" in analysis:
+            raise HTTPException(500, analysis["error"])
+
+        return YouTubeCommentsAnalysisResponse(
+            video_id=video_id,
+            total_comments_analyzed=len(comments),
+            **analysis
+        )
+
+    except Exception as e:
+        logger.error(f"Comments analysis error: {e}")
         raise HTTPException(500, str(e))

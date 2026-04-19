@@ -53,3 +53,23 @@ export type YoutubeResult = {
   recommendations?: Recommendation[]
   model_used?: string
 }
+
+export type CommentsAnalysisResponse = {
+  video_id: string
+  total_comments_analyzed: number
+  overall_sentiment: string
+  sentiment_distribution: {
+    positive: number
+    neutral: number
+    negative: number
+  }
+  key_themes: string[]
+  audience_questions: string[]
+  brand_mentions: string[]
+  top_comments: {
+    author: string
+    text: string
+    sentiment: string
+  }[]
+  error?: string
+}

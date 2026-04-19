@@ -6,10 +6,9 @@ import {
     DialogTitle,
     DialogDescription,
     DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from '@/components/ui/button';
-import { Sparkles, ExternalLink } from 'lucide-react';
-import apiClient from '../../services/apiClient';
+} from "../ui/dialog";
+import { Button } from '../ui/button';
+import { Send, User, Target, FileText, X } from 'lucide-react';
 
 interface SponsorOutreachModalProps {
     isOpen: boolean;
@@ -17,7 +16,6 @@ interface SponsorOutreachModalProps {
     influencerName: string;
     niche: string;
     campaignDetails: string;
-    influencerEmail?: string;
 }
 
 const SponsorOutreachModal: React.FC<SponsorOutreachModalProps> = ({
@@ -25,63 +23,70 @@ const SponsorOutreachModal: React.FC<SponsorOutreachModalProps> = ({
     onClose,
     influencerName,
     niche,
-    campaignDetails,
+    campaignDetails
 }) => {
-    // Determine channel URL based on name (Mock logic for now, ideally passed in props)
-    const getChannelUrl = (name: string) => {
-        // Simple heuristic for demo purposes
-        const handle = name.replace(/\s+/g, '').toLowerCase();
-        return `https://www.youtube.com/@${handle}`;
-    };
-
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] bg-gray-900 border-white/10 text-white p-0 overflow-hidden">
-                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 p-6 border-b border-white/10">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-xl text-white">
-                            <Sparkles className="w-5 h-5 text-purple-400" />
-                            Connect with {influencerName}
-                        </DialogTitle>
-                        <DialogDescription className="text-gray-400">
-                            Professional outreach for {niche} creators.
-                        </DialogDescription>
-                    </DialogHeader>
-                </div>
+            <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-xl">
+                        <Send className="w-5 h-5 text-blue-500" />
+                        Influencer Outreach
+                    </DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
+                        Connect with <strong>{influencerName}</strong> for your campaign.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <div className="p-6 space-y-6">
-                    <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                            <span className="text-3xl font-bold text-white">{influencerName.charAt(0)}</span>
+                <div className="py-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1 flex items-center gap-1">
+                                <Target className="w-3 h-3" /> Niche
+                            </p>
+                            <p className="text-sm font-semibold">{niche}</p>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-white">{influencerName}</h3>
-                            <p className="text-sm text-gray-400">Ready to collaborate on your campaign</p>
-                        </div>
-
-                        <div className="p-4 bg-white/5 rounded-xl border border-white/10 w-full text-left">
-                            <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Campaign Context</h4>
-                            <p className="text-sm text-gray-300 line-clamp-2">{campaignDetails}</p>
+                        <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1 flex items-center gap-1">
+                                <User className="w-3 h-3" /> Creator
+                            </p>
+                            <p className="text-sm font-semibold">{influencerName}</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={onClose}
-                            className="w-full bg-transparent border-white/10 text-gray-400 hover:text-white hover:bg-white/5"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={() => window.open(getChannelUrl(influencerName), '_blank')}
-                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0"
-                        >
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Visit Channel
-                        </Button>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-border">
+                        <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Campaign Details
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                            {campaignDetails}
+                        </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-muted/10 border border-dashed border-border text-center py-8">
+                        <p className="text-muted-foreground text-xs italic">
+                            [Placeholder: Outreach message generation logic was in the original component file which is currently missing. Please restore the original code here.]
+                        </p>
                     </div>
                 </div>
+
+                <DialogFooter className="flex gap-2">
+                    <Button
+                        variant="ghost"
+                        onClick={onClose}
+                        className="flex-1 border-border hover:bg-muted text-muted-foreground"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled
+                    >
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Invite
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
